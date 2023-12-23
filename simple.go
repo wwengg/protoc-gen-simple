@@ -16,6 +16,7 @@ const (
 	rpcxProtocolPackage = protogen.GoImportPath("github.com/smallnest/rpcx/protocol")
 	SimplesrpcPackage   = protogen.GoImportPath("github.com/wwengg/simple/core/srpc")
 	SimpleStorePackage  = protogen.GoImportPath("github.com/wwengg/simple/core/store")
+	GormPackage         = protogen.GoImportPath("gorm.io/gorm")
 )
 
 // generateFile generates a _grpc.pb.go file containing gRPC service definitions.
@@ -61,9 +62,12 @@ func generateFileContent(gen *protogen.Plugin, file *protogen.File, g *protogen.
 
 	g.P("// Reference imports to suppress errors if they are not otherwise used.")
 	g.P("var _ = ", contextPackage.Ident("TODO"))
-	// g.P("var _ = ", rpcxServerPackage.Ident("NewServer"))
+	g.P("var _ = ", rpcxServerPackage.Ident("NewServer"))
 	g.P("var _ = ", rpcxClientPackage.Ident("NewClient"))
 	g.P("var _ = ", rpcxProtocolPackage.Ident("NewMessage"))
+	g.P("var _ = ", SimplesrpcPackage.Ident("TODO"))
+	g.P("var _ = ", SimpleStorePackage.Ident("TODO"))
+	g.P("var _ = ", GormPackage.Ident("ErrEmptySlice"))
 	g.P()
 	g.P("//================== Model ===================")
 	for _, message := range file.Messages {
@@ -190,6 +194,57 @@ func generateModelCode(g *protogen.GeneratedFile, message *protogen.Message) {
 
 	}
 	g.P(`		}`)
+	g.P()
+	g.P(fmt.Sprintf(`
+
+		func (model *%[1]s) Proto() *%[2]s {
+			return &%[2]s{}
+		}
+
+		
+		// Create%[1]s Func 创建
+		func Create%[1]s(a %[1]s) (err error) {
+			err = global.DB_.Create(&a).Error
+			return err
+		}
+		
+		// Delete%[1]s  删除
+		func Delete%[1]s(a %[1]s) (err error) {
+			err = global.DB_.Delete(&a).Error
+			return err
+		}
+
+		// Update%[1]s 修改
+		func Update%[1]s(a *%[1]s) (err error) {
+			err = global.DB_.Save(e).Error
+			return err
+		}
+
+		// Update%[1]s 查询
+		func Get%[1]s(id int64) (result %[1]s, err error) {
+			err = global.DB_.Where("id = ?", id).First(&result).Error
+			return
+		}
+
+		// 分页查询
+		func Get%[1]sList(info pbbase.PageInfo) (list []%[1]s, total int64, err error) {
+			limit := info.PageSize
+			offset := info.PageSize * (info.Page - 1)
+			db := global.DB_.Model(&%[1]s{})
+			var %[1]sList []%[1]s
+			// 此处增加查询条件
+			//if info.Keyword != "" {
+			//	db.Where("keywaord = ?", info.Keyword)
+			//}
+			err = db.Count(&total).Error
+			if err != nil {
+				return %[1]sList, total, err
+			} else {
+				err = db.Limit(int(limit)).Offset(int(offset)).Find(&%[1]sList).Error
+			}
+			return %[1]sList, total, err
+		}
+`, afterName, name))
 }
 
 func generateModelFiled(g *protogen.GeneratedFile, field *protogen.Field) {
@@ -199,6 +254,10 @@ func generateModelFiled(g *protogen.GeneratedFile, field *protogen.Field) {
 		g.P(fmt.Sprintf(`		%s  string `, field.GoName) + "`" + fmt.Sprintf(`json:"%s"gorm:"column:%s;comment: ;type:varchar(20);size:20;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
 	case protoreflect.DoubleKind:
 		g.P(fmt.Sprintf(`		%s  float64 `, field.GoName) + "`" + fmt.Sprintf(`json:"%s"gorm:"column:%s;comment: ;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
+	case protoreflect.Int64Kind:
+		g.P(fmt.Sprintf(`		%s  int64 `, field.GoName) + "`" + fmt.Sprintf(`json:"%s"gorm:"column:%s;comment: ;type:bigint(20);size:20;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
+	case protoreflect.Int32Kind:
+		g.P(fmt.Sprintf(`		%s  int32 `, field.GoName) + "`" + fmt.Sprintf(`json:"%s"gorm:"column:%s;comment: ;type:smallint(6);size:6;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
 	default:
 		g.P(fmt.Sprintf(`		%s  interface{} `, field.GoName) + "`" + fmt.Sprintf(`json:"%s"gorm:"column:%s;comment: ;type:any(20);size:20;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
 
