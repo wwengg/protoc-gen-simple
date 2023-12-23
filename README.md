@@ -14,10 +14,10 @@ go install github.com/gogo/protobuf/protoc-gen-gofast@latest // 支持gogo gofas
 go install github.com/rpcxio/protoc-gen-go@latest // 本插件
 ```
 
-- 编译rpcx插件:
+- 编译simple插件:
 
 ```sh
-go install github.com/rpcxio/protoc-gen-rpcx@latest
+go install github.com/wwengg/protoc-gen-simple@latest
 ```
 
 如果你到达了这一步，恭喜你，插件安装成功了，按照下面的命令你就可以将proto中定义的service编译成rpcx的服务和客户端代码了:
@@ -26,14 +26,14 @@ protobuf官方库(如果未设置GOPATH,请去掉`-I${GOPATH}/src`或者设置GO
 ```sh
 protoc -I. -I${GOPATH}/src \
    --go_out=. \
-  --rpcx_out=. --rpcx_opt=paths=source_relative helloworld.proto
+  --simple_out=. --simple_opt=paths=source_relative helloworld.proto
 ```
 
 gogo库(如果未设置GOPATH,请去掉`-I${GOPATH}/src`或者设置GOPAH)：
 ```sh
 protoc -I. -I${GOPATH}/src \
   --gofast_out=. --gofast_opt=paths=source_relative \
-  --rpcx_out=. --rpcx_opt=paths=source_relative *.proto
+  --simple_out=. --simple_out=paths=source_relative *.proto
 ```
 
 ## 例子
@@ -71,7 +71,7 @@ message HelloReply {
 ```sh
 protoc -I. -I${GOPATH}/src \
   --gofast_out=. --gofast_opt=paths=source_relative \
-  --rpcx_out=. --rpcx_opt=paths=source_relative helloworld.proto
+  --simple_out=. --simple_out=paths=source_relative helloworld.proto
 ```
 
 上述命令生成了 `helloworld.pb.go` 与 `helloworld.rpcx.pb.go` 两个文件。 `helloworld.pb.go` 文件是由protoc-gen-gofast插件生成的，
