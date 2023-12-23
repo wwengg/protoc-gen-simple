@@ -216,7 +216,7 @@ func generateModelCode(g *protogen.GeneratedFile, message *protogen.Message) {
 
 		// Update%[1]s 修改
 		func Update%[1]s(a *%[1]s) (err error) {
-			err = global.DB_.Save(e).Error
+			err = global.DB_.Save(a).Error
 			return err
 		}
 
