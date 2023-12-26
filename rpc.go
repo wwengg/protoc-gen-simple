@@ -53,8 +53,8 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 		func (model *%[1]s) Proto() *%[2]s {
 			return &%[2]s{
 				Id: model.ID,
-				CreatedAt: model.CreatedAt,
-				UpdatedAt: model.UpdatedAt,
+				CreatedAt: model.CreatedAt.Format(time.DateTime),
+				UpdatedAt: model.UpdatedAt.Format(time.DateTime),
 `, afterName, fullName))
 	for _, field := range message.Fields {
 		if field.GoName == "Id" || field.GoName == "CreatedAt" || field.GoName == "UpdatedAt" || field.GoName == "DeletedAt" {
@@ -68,13 +68,11 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 
 	g.P(fmt.Sprintf(`
 		func %[1]sProtoToModel(proto *%[2]s) *%[1]s {
-			return &%[1]s{
+			%[3]s := &%[1]s{
 				BASE_MODEL: store.BASE_MODEL{
 					ID:        proto.Id,
-					CreatedAt: proto.CreatedAt,
-					UpdatedAt: proto.UpdatedAt,
 				},
-`, afterName, fullName))
+`, afterName, fullName, lowerFirstLatter(afterName)))
 	for _, field := range message.Fields {
 		if field.GoName == "Id" || field.GoName == "CreatedAt" || field.GoName == "UpdatedAt" || field.GoName == "DeletedAt" {
 			continue
@@ -82,13 +80,18 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 		g.P(fmt.Sprintf(`				%s: proto.%s,`, field.GoName, field.GoName))
 
 	}
-	g.P(`			}
-		}`)
+	g.P(fmt.Sprintf(`			}
+			if createdAt,err := time.Parse(time.DateTime,proto.CreatedAt);err == nil{
+				user.CreatedAt = createdAt
+			}
+			if updatedAt,err := time.Parse(time.DateTime,proto.UpdatedAt);err == nil{
+				user.CreatedAt = updatedAt
+			}
+			return &%[1]s
+		}`, lowerFirstLatter(afterName)))
 
 	g.P()
-	g.P(fmt.Sprintf(`
-
-		// Create%[1]s Func 创建
+	g.P(fmt.Sprintf(`// Create%[1]s Func 创建
 		func Create%[1]s(a %[1]s) (err error) {
 			err = global.DB_.Create(&a).Error
 			return err
