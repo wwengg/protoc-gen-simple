@@ -74,7 +74,7 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 					CreatedAt: proto.CreatedAt,
 					UpdatedAt: proto.UpdatedAt,
 				},
-`, afterName, name))
+`, afterName, fullName))
 	for _, field := range message.Fields {
 		if field.GoName == "Id" || field.GoName == "CreatedAt" || field.GoName == "UpdatedAt" || field.GoName == "DeletedAt" {
 			continue
@@ -170,12 +170,15 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 	g.P()
 	g.P("// Reference imports to suppress errors if they are not otherwise used.")
 	g.P("var _ = ", SimpleStorePackage.Ident("TODO"))
+	g.P("var _ = ", contextPackage.Ident("TODO"))
 	g.P()
 	g.P(fmt.Sprintf(`type %[1]s struct {}
 	`, serviceName))
 	for _, method := range service.Methods {
-		inType := g.QualifiedGoIdent(method.Input.GoIdent)
-		outType := g.QualifiedGoIdent(method.Output.GoIdent)
+		//inType := g.QualifiedGoIdent(method.Input.GoIdent)
+		//method.Input.Desc.FullName()
+		//outType := g.QualifiedGoIdent(method.Output.GoIdent)
+		outType := method.Output.Desc.FullName()
 		methodName := upperFirstLatter(method.GoName)
 		g.P(fmt.Sprintf(`// %s is server rpc method as defined
 		func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
@@ -186,7 +189,7 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 
 			return nil
 		}
-	`, methodName, serviceName, methodName, inType, outType, outType))
+	`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType))
 	}
 
 }
