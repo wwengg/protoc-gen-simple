@@ -60,7 +60,7 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 		if field.GoName == "Id" || field.GoName == "CreatedAt" || field.GoName == "UpdatedAt" || field.GoName == "DeletedAt" {
 			continue
 		}
-		g.P(fmt.Sprintf(`				%s: model.%s`, field.GoName, field.GoName))
+		g.P(fmt.Sprintf(`				%s: model.%s,`, field.GoName, field.GoName))
 
 	}
 	g.P(`			}
@@ -79,7 +79,7 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 		if field.GoName == "Id" || field.GoName == "CreatedAt" || field.GoName == "UpdatedAt" || field.GoName == "DeletedAt" {
 			continue
 		}
-		g.P(fmt.Sprintf(`				%s: proto.%s`, field.GoName, field.GoName))
+		g.P(fmt.Sprintf(`				%s: proto.%s,`, field.GoName, field.GoName))
 
 	}
 	g.P(`			}
