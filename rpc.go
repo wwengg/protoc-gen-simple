@@ -68,7 +68,7 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 
 	g.P(fmt.Sprintf(`
 		func %[1]sProtoToModel(proto *%[2]s) *%[1]s {
-			%[3]s := &%[1]s{
+			%[3]s := %[1]s{
 				BASE_MODEL: store.BASE_MODEL{
 					ID:        proto.Id,
 				},
