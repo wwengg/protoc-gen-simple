@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"google.golang.org/protobuf/reflect/protoreflect"
 	"regexp"
 	"strings"
 
@@ -178,6 +177,7 @@ func genService(gen *protogen.Plugin, file *protogen.File, g *protogen.Generated
 
 func generateModelCode(g *protogen.GeneratedFile, message *protogen.Message) {
 	name := g.QualifiedGoIdent(message.GoIdent)
+	fullName := message.Desc.FullName()
 	afterName, _ := strings.CutSuffix(name, "Model")
 	g.P(fmt.Sprintf("//================== %s Model ===================", afterName))
 	g.P()
@@ -244,25 +244,7 @@ func generateModelCode(g *protogen.GeneratedFile, message *protogen.Message) {
 			}
 			return %[1]sList, total, err
 		}
-`, afterName, name))
-}
-
-func generateModelFiled(g *protogen.GeneratedFile, field *protogen.Field) {
-	lowerFirstLatter(field.GoName)
-	switch field.Desc.Kind() {
-	case protoreflect.StringKind:
-		g.P(fmt.Sprintf(`		%s  string `, field.GoName) + "`" + fmt.Sprintf(`json:"%s" gorm:"column:%s;comment: ;type:varchar(20);size:20;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
-	case protoreflect.DoubleKind:
-		g.P(fmt.Sprintf(`		%s  float64 `, field.GoName) + "`" + fmt.Sprintf(`json:"%s" gorm:"column:%s;comment: ;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
-	case protoreflect.Int64Kind:
-		g.P(fmt.Sprintf(`		%s  int64 `, field.GoName) + "`" + fmt.Sprintf(`json:"%s" gorm:"column:%s;comment: ;type:bigint(20);size:20;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
-	case protoreflect.Int32Kind:
-		g.P(fmt.Sprintf(`		%s  int32 `, field.GoName) + "`" + fmt.Sprintf(`json:"%s" gorm:"column:%s;comment: ;type:smallint(6);size:6;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
-	default:
-		g.P(fmt.Sprintf(`		%s  interface{} `, field.GoName) + "`" + fmt.Sprintf(`json:"%s" gorm:"column:%s;comment: ;type:any(20);size:20;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
-
-	}
-
+`, afterName, fullName))
 }
 
 func generateServerCode(g *protogen.GeneratedFile, service *protogen.Service, method *protogen.Method) {

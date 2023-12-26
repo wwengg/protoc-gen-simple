@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"strings"
 
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/types/pluginpb"
@@ -26,7 +27,20 @@ func main() {
 			if !f.Generate {
 				continue
 			}
-			generateFile(gen, f)
+			//generateFile(gen, f)
+			if len(f.Messages) > 0 {
+				for _, message := range f.Messages {
+					if _, found := strings.CutSuffix(string(message.Desc.Name()), "Model"); found {
+						generateModelFile(gen, f, message)
+					}
+				}
+			}
+			if len(f.Services) > 0 {
+				for _, service := range f.Services {
+					generateSimpleServerCode(gen, f, service)
+				}
+			}
+
 		}
 		return nil
 	})
