@@ -30,7 +30,7 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 		g.P("// source: ", file.Desc.Path())
 	}
 	g.P()
-	g.P("package ", file.GoPackageName)
+	g.P("package model")
 	g.P()
 	g.P("// Reference imports to suppress errors if they are not otherwise used.")
 	g.P("var _ = ", SimpleStorePackage.Ident("TODO"))
@@ -82,12 +82,12 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 	}
 	g.P(fmt.Sprintf(`			}
 			if createdAt,err := time.Parse(time.DateTime,proto.CreatedAt);err == nil{
-				user.CreatedAt = createdAt
+				%[1]s.CreatedAt = createdAt
 			}
 			if updatedAt,err := time.Parse(time.DateTime,proto.UpdatedAt);err == nil{
-				user.CreatedAt = updatedAt
+				%[1]s.CreatedAt = updatedAt
 			}
-			return &%[1]s
+			return %[1]s
 		}`, lowerFirstLatter(afterName)))
 
 	g.P()
