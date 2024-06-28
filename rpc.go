@@ -6,9 +6,10 @@ package main
 
 import (
 	"fmt"
+	"strings"
+
 	"google.golang.org/protobuf/compiler/protogen"
 	"google.golang.org/protobuf/reflect/protoreflect"
-	"strings"
 )
 
 func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *protogen.Message) *protogen.GeneratedFile {
@@ -87,7 +88,7 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 			if updatedAt,err := time.Parse(time.DateTime,proto.UpdatedAt);err == nil{
 				%[1]s.CreatedAt = updatedAt
 			}
-			return %[1]s
+			return &%[1]s
 		}`, lowerFirstLatter(afterName)))
 
 	g.P()
@@ -169,7 +170,7 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 		g.P("// source: ", file.Desc.Path())
 	}
 	g.P()
-	g.P("package ", file.GoPackageName)
+	g.P("package impl")
 	g.P()
 	g.P("// Reference imports to suppress errors if they are not otherwise used.")
 	g.P("var _ = ", SimpleStorePackage.Ident("TODO"))
@@ -183,16 +184,88 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 		//outType := g.QualifiedGoIdent(method.Output.GoIdent)
 		outType := method.Output.Desc.FullName()
 		methodName := upperFirstLatter(method.GoName)
-		g.P(fmt.Sprintf(`// %s is server rpc method as defined
+		if methodName[:6] == "Create" {
+			g.P(fmt.Sprintf(`// %s is server rpc method as defined
 		func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
-			// TODO: add business logics
-
-			// TODO: setting return values
 			*reply = %s{}
+			if err = model.%s(*model.%sProtoToModel(args));err == nil{
+				reply.Code = pbcommon.EnumCode_Success
+			}else{
+				reply.Code = pbcommon.EnumCode_CreateError
+			}
 
 			return nil
 		}
-	`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType))
+	`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, methodName, serviceName))
+		} else if methodName[:6] == "Update" {
+			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
+				*reply = %s{}
+				if err = model.%s(model.%sProtoToModel(args));err == nil{
+					reply.Code = pbcommon.EnumCode_Success
+				}else{
+					reply.Code = pbcommon.EnumCode_UpdateError
+				}
+	
+				return nil
+			}
+		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, methodName, serviceName))
+		} else if methodName[:6] == "Delete" {
+			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
+				*reply = %s{}
+				if err = model.%s(model.%s{BASE_MODEL: store.BASE_MODEL{
+					ID: args.Id,
+				},});err == nil{
+					reply.Code = pbcommon.EnumCode_Success
+				}else{
+					reply.Code = pbcommon.EnumCode_UpdateError
+				}
+	
+				return nil
+			}
+		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, methodName, serviceName))
+		} else if methodName[:4] == "Find" && methodName[len(methodName)-4:] == "ById" {
+			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
+				*reply = %s{}
+				if result,err := model.Get%s(args.Id);err == nil{
+					reply.Data = result.Proto()
+					reply.Code = pbcommon.EnumCode_Success
+				}else{
+					reply.Code = pbcommon.EnumCode_FindError
+				}
+				return nil
+			}
+		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, serviceName))
+		} else if methodName[:4] == "Find" && methodName[len(methodName)-4:] == "List" {
+			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
+				*reply = %s{}
+				if list,total,err :=model.Get%sList(*args.PageInfo);err == nil{
+					for _, v := range list {
+						reply.List = append(reply.List, v.Proto())
+					}
+					reply.Total = total
+					reply.Code = pbcommon.EnumCode_Success
+				}else{
+					reply.Code = pbcommon.EnumCode_FindError
+				}
+				return nil
+			}
+		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, serviceName))
+		} else {
+			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
+				// TODO: add business logics
+	
+				// TODO: setting return values
+				*reply = %s{}
+	
+				return nil
+			}
+		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType))
+		}
 	}
 
 }
