@@ -152,7 +152,6 @@ func generateModelFiled(g *protogen.GeneratedFile, field *protogen.Field) {
 		g.P(fmt.Sprintf(`		%s  interface{} `, field.GoName) + "`" + fmt.Sprintf(`json:"%s" gorm:"column:%s;comment: ;type:any(20);size:20;"`, field.Desc.JSONName(), ToSnakeCase(field.GoName)) + "`")
 
 	}
-
 }
 
 func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service *protogen.Service) {

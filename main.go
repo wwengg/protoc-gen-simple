@@ -32,12 +32,14 @@ func main() {
 				for _, message := range f.Messages {
 					if _, found := strings.CutSuffix(string(message.Desc.Name()), "Model"); found {
 						generateModelFile(gen, f, message)
+						generateTableFile(gen, f, message)
 					}
 				}
 			}
 			if len(f.Services) > 0 {
 				for _, service := range f.Services {
 					generateSimpleServerCode(gen, f, service)
+					generateApiCode(gen, f, service)
 				}
 			}
 
