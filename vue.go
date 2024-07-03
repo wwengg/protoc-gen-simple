@@ -308,7 +308,7 @@ import protoRoot from '@/proto/proto.js'
     pb: '%[4]s'
   })
 }
-`, method.GoName, lowerFirstLatter(serviceName), method.Input.Desc.FullName(), method.Output.Desc.FullName()))
+`, lowerFirstLatter(method.GoName), lowerFirstLatter(serviceName), method.Input.Desc.FullName(), method.Output.Desc.FullName()))
 	}
 
 }
