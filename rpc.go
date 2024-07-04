@@ -35,6 +35,7 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 	g.P()
 	g.P("// Reference imports to suppress errors if they are not otherwise used.")
 	g.P("var _ = ", SimpleStorePackage.Ident("TODO"))
+	g.P("var _ = ", TimePackage.Ident("Now"))
 	g.P()
 	g.P(fmt.Sprintf(`// %s Model
 		type %s struct {

@@ -16,6 +16,7 @@ const (
 	SimplesrpcPackage   = protogen.GoImportPath("github.com/wwengg/simple/core/srpc")
 	SimpleStorePackage  = protogen.GoImportPath("github.com/wwengg/simple/core/store")
 	GormPackage         = protogen.GoImportPath("gorm.io/gorm")
+	TimePackage         = protogen.GoImportPath("time")
 )
 
 // generateFile generates a _grpc.pb.go file containing gRPC service definitions.
