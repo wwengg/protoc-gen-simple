@@ -219,7 +219,7 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 				},});err == nil{
 					reply.Code = pbcommon.EnumCode_Success
 				}else{
-					reply.Code = pbcommon.EnumCode_UpdateError
+					reply.Code = pbcommon.EnumCode_DeleteError
 				}
 	
 				return nil

@@ -212,7 +212,7 @@ export default {
       })
     },
     async handleDelete(row) {
-      await delete%[1]s(row.id)
+      await delete%[1]s({id:row.id})
       this.getTableData()
     }
   }
