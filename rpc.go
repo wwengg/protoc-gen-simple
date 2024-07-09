@@ -87,7 +87,7 @@ func generateModelFile(gen *protogen.Plugin, file *protogen.File, message *proto
 				%[1]s.CreatedAt = createdAt
 			}
 			if updatedAt,err := time.Parse(time.DateTime,proto.UpdatedAt);err == nil{
-				%[1]s.CreatedAt = updatedAt
+				%[1]s.UpdatedAt = updatedAt
 			}
 			return &%[1]s
 		}`, lowerFirstLatter(afterName)))
