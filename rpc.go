@@ -184,8 +184,20 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 		//outType := g.QualifiedGoIdent(method.Output.GoIdent)
 		outType := method.Output.Desc.FullName()
 		methodName := upperFirstLatter(method.GoName)
-		if methodName[:6] == "Create" {
+		if len(methodName) < 6 {
 			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
+				// TODO: add business logics
+	
+				// TODO: setting return values
+				*reply = %s{}
+	
+				return nil
+			}
+		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType))
+		} else {
+			if methodName[:6] == "Create" {
+				g.P(fmt.Sprintf(`// %s is server rpc method as defined
 		func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
 			*reply = %s{}
 			if err = model.%s(*model.%sProtoToModel(args));err == nil{
@@ -197,8 +209,8 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 			return nil
 		}
 	`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, methodName, serviceName))
-		} else if methodName[:6] == "Update" {
-			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			} else if methodName[:6] == "Update" {
+				g.P(fmt.Sprintf(`// %s is server rpc method as defined
 			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
 				*reply = %s{}
 				if err = model.%s(model.%sProtoToModel(args));err == nil{
@@ -210,8 +222,8 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 				return nil
 			}
 		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, methodName, serviceName))
-		} else if methodName[:6] == "Delete" {
-			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			} else if methodName[:6] == "Delete" {
+				g.P(fmt.Sprintf(`// %s is server rpc method as defined
 			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
 				*reply = %s{}
 				if err = model.%s(model.%s{BASE_MODEL: store.BASE_MODEL{
@@ -225,8 +237,8 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 				return nil
 			}
 		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, methodName, serviceName))
-		} else if methodName[:4] == "Find" && methodName[len(methodName)-4:] == "ById" {
-			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			} else if methodName[:4] == "Find" && methodName[len(methodName)-4:] == "ById" {
+				g.P(fmt.Sprintf(`// %s is server rpc method as defined
 			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
 				*reply = %s{}
 				if result,err := model.Get%s(args.Id);err == nil{
@@ -238,8 +250,8 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 				return nil
 			}
 		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, serviceName))
-		} else if methodName[:4] == "Find" && methodName[len(methodName)-4:] == "List" {
-			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			} else if methodName[:4] == "Find" && methodName[len(methodName)-4:] == "List" {
+				g.P(fmt.Sprintf(`// %s is server rpc method as defined
 			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
 				*reply = %s{}
 				if list,total,err :=model.Get%sList(*args.PageInfo);err == nil{
@@ -254,8 +266,8 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 				return nil
 			}
 		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType, serviceName))
-		} else {
-			g.P(fmt.Sprintf(`// %s is server rpc method as defined
+			} else {
+				g.P(fmt.Sprintf(`// %s is server rpc method as defined
 			func (s *%s) %s(ctx context.Context, args *%s, reply *%s) (err error){
 				// TODO: add business logics
 	
@@ -265,6 +277,7 @@ func generateSimpleServerCode(gen *protogen.Plugin, file *protogen.File, service
 				return nil
 			}
 		`, methodName, serviceName, methodName, method.Input.Desc.FullName(), outType, outType))
+			}
 		}
 	}
 
