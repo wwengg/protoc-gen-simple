@@ -182,7 +182,7 @@ export default {
       })
     },
     async handleUpdate(row) {
-      const res = await find%[1]sById(row.id)
+      const res = await find%[1]sById({ id: row.id })
       console.log(res)
       if (res.code === 'Success') {
         this.temp = res.data
