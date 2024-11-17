@@ -291,6 +291,7 @@ func generateApiCode(gen *protogen.Plugin, file *protogen.File, service *protoge
 	filename := lowerFirstLatter(serviceName) + ".js"
 	g := gen.NewGeneratedFile(filename, file.GoImportPath)
 	g.P(`import request from '@/utils/request'
+import protoRoot from '@/proto/proto.js'
 `)
 	for _, method := range service.Methods {
 		//inType := g.QualifiedGoIdent(method.Input.GoIdent)
@@ -299,7 +300,7 @@ func generateApiCode(gen *protogen.Plugin, file *protogen.File, service *protoge
 		// outType := method.Output.Desc.FullName()
 		// methodName := upperFirstLatter(method.GoName)
 		g.P(fmt.Sprintf(`export function %[1]s(data) {
-  var buffer = this.$protoRoot.%[3]s.encode(data).finish().slice().buffer
+  var buffer = protoRoot.%[3]s.encode(data).finish().slice().buffer
   return request({
     url: '/v2/%[2]s/%[1]s',
     method: 'post',
